@@ -97,22 +97,12 @@ def _extract_face(image, bbox, face_scale_thres = (20, 20)):
   else:
     return face
 
-bbox = _extract_bbox(image)
-face = _extract_face(image, bbox)
-plt.axis("off")
-plt.imshow(face)
-cv2.imshow("abc",face)
-cv2.waitKey(0)
-
 
 
 from imutils import paths
 DATASET_PATH = "Dataset"
 
 def _model_processing(face_scale_thres = (20, 20)):
-  """
-  face_scale_thres: Ngưỡng (W, H) để chấp nhận một khuôn mặt.
-  """
   image_links = list(paths.list_images(DATASET_PATH))
   images_file = []
   y_labels = []
@@ -153,11 +143,6 @@ def _load_pickle(file_path):
     obj = pickle.load(f)
   return obj
 
-# _save_pickle(faces, "Dataset/faces.pkl")
-# _save_pickle(y_labels, "Dataset/y_labels.pkl")
-# _save_pickle(images_file, "Dataset/images_file.pkl")
-
-
 def _embedding_faces(encoder, faces):
   emb_vecs = []
   for face in faces:
@@ -167,22 +152,19 @@ def _embedding_faces(encoder, faces):
     vec = encoder.forward()
     emb_vecs.append(vec)
   return emb_vecs
-
-
 embed_faces = _embedding_faces(encoder, faces)
 _save_pickle(embed_faces, "Dataset/embed_blob_faces.pkl")
 
-# embed_faces = _load_pickle("Dataset/embed_blob_faces.pkl")
-# y_labels = _load_pickle("Dataset/y_labels.pkl")
-
-
-# from sklearn.model_selection import train_test_split
-# ids = np.arange(len(y_labels))
-#
-# X_train, X_test, y_train, y_test, id_train, id_test = train_test_split(np.stack(embed_faces), y_labels, ids, test_size = 0.3, random_state=20)
-# X_train = np.squeeze(X_train, axis = 1)
-# X_test = np.squeeze(X_test, axis = 1)
-# print(X_train.shape, X_test.shape)
-# print(len(y_train), len(y_test))
-# _save_pickle(id_train, "Dataset/X_train.pkl")
-# _save_pickle(id_test, "Dataset/X_test.pkl")
+def read_name(y_label):
+  name=[]
+  for t in y_label:
+    s=''
+    for i in range(8,len(t)):
+      if ord(t[i+1])>60:
+        s=s+t[i]
+      if ord(t[i+1])<=60:
+        break
+    name.append(s)
+  return name
+name_face=read_name(y_labels)
+_save_pickle(name_face,"Dataset/y_labels.pkl")

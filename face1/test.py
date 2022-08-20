@@ -24,6 +24,4 @@ def read_name(y_label):
     name.append(s)
   return name
 name_face=read_name(y_label)
-print(len(name_face))
-print(name_face[10])
 _save_pickle(name_face,"Dataset/name_face.pkl")

@@ -87,11 +87,12 @@ def _embedding_faces(encoder, faces):
 
 
 from sklearn.metrics.pairwise import cosine_similarity
-def _most_similarity(embed_vecs, vec):
+def _most_similarity(embed_vecs, vec, labels):
   sim = cosine_similarity(embed_vecs, vec)
   sim = np.squeeze(sim, axis = 1)
   argmax = np.argsort(sim)[::-1][:1]
-  return argmax
+  label = [labels[idx] for idx in argmax][0]
+  return label
 
 def test_image(image):
   faces = _model_processing(image)
@@ -101,9 +102,9 @@ def test_image(image):
   vec_train = []
   for t in em_loc:
     vec_train.append(t[0])
-  k=_most_similarity(vec_train, vec)
-  name_face=_load_pickle("Dataset/name_face.pkl")
-  return name_face[k[0]]
+  y_label=_load_pickle("Dataset/y_labels.pkl")
+  k=_most_similarity(vec_train, vec,y_label)
+  return k
 
-image= _image_read("sontung.JPG")
+image= _image_read("imgtest/sontung.JPG")
 print(test_image(image))
