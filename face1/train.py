@@ -1,22 +1,16 @@
-import cv2
 import os
 import numpy as np
 import pickle
+import cv2
 
 path=''
 EMBEDDING_FL = os.path.join(path,"openface.nn4.small2.v1.t7")
 DATASET_PATH = os.path.join(path,"Dataset")
 def _load_torch(model_path_fl):
-  """
-  model_path_fl: Link file chứa weigth của model
-  """
   model = cv2.dnn.readNetFromTorch(model_path_fl)
   return model
-encoder = _load_torch(EMBEDDING_FL)    #load model
+encoder = _load_torch(EMBEDDING_FL)
 
-
-
-import cv2
 
 def _blobImage(image, out_size = (300, 300), scaleFactor = 1.0, mean = (104.0, 177.0, 123.0)):
   """
@@ -56,6 +50,8 @@ def _image_read(image_path):
 
 image = _image_read(IMAGE_TEST)
 
+
+
 def _extract_bbox(image, single = True):
   """
   Trích xuất ra tọa độ của face từ ảnh input
@@ -73,7 +69,6 @@ def _extract_bbox(image, single = True):
     return bbox
   else:
     return bboxs
-
 
 
 def _extract_face(image, bbox, face_scale_thres = (20, 20)):
@@ -102,11 +97,12 @@ def _extract_face(image, bbox, face_scale_thres = (20, 20)):
   else:
     return face
 
-# bbox = _extract_bbox(image)
-# face = _extract_face(image, bbox)
-# plt.axis("off")
-# plt.imshow(face)
-
+bbox = _extract_bbox(image)
+face = _extract_face(image, bbox)
+plt.axis("off")
+plt.imshow(face)
+cv2.imshow("abc",face)
+cv2.waitKey(0)
 
 
 
@@ -131,7 +127,7 @@ def _model_processing(face_scale_thres = (20, 20)):
     (h, w) = image.shape[:2]
     # Detect vị trí các khuôn mặt trên ảnh. Gỉa định rằng mỗi bức ảnh chỉ có duy nhất 1 khuôn mặt của chủ nhân classes.
     bbox =_extract_bbox(image, single=True)
-    # print(bbox_ratio)
+    # print(bbox)
     if bbox is not None:
       # Lấy ra face
       face = _extract_face(image, bbox, face_scale_thres = (20, 20))
@@ -148,7 +144,6 @@ def _model_processing(face_scale_thres = (20, 20)):
 faces, y_labels, images_file = _model_processing()
 
 
-
 def _save_pickle(obj, file_path):
   with open(file_path, 'wb') as f:
     pickle.dump(obj, f)
@@ -158,9 +153,9 @@ def _load_pickle(file_path):
     obj = pickle.load(f)
   return obj
 
-_save_pickle(faces, "Dataset/faces.pkl")
-_save_pickle(y_labels, "Dataset/y_labels.pkl")
-_save_pickle(images_file, "Dataset/images_file.pkl")
+# _save_pickle(faces, "Dataset/faces.pkl")
+# _save_pickle(y_labels, "Dataset/y_labels.pkl")
+# _save_pickle(images_file, "Dataset/images_file.pkl")
 
 
 def _embedding_faces(encoder, faces):
@@ -173,25 +168,21 @@ def _embedding_faces(encoder, faces):
     emb_vecs.append(vec)
   return emb_vecs
 
-faces= _load_pickle("Dataset/faces.pkl")
+
 embed_faces = _embedding_faces(encoder, faces)
 _save_pickle(embed_faces, "Dataset/embed_blob_faces.pkl")
 
+# embed_faces = _load_pickle("Dataset/embed_blob_faces.pkl")
+# y_labels = _load_pickle("Dataset/y_labels.pkl")
 
 
-
-embed_faces = _load_pickle("Dataset/embed_blob_faces.pkl")
-y_labels = _load_pickle("Dataset/y_labels.pkl")
-
-from sklearn.model_selection import train_test_split
-ids = np.arange(len(y_labels))
-
-X_train, X_test, y_train, y_test, id_train, id_test = train_test_split(np.stack(embed_faces), y_labels, ids, test_size = 0.3, random_state=20)
-
-X_train = np.squeeze(X_train, axis = 1)
-X_test = np.squeeze(X_test, axis = 1)
-print(X_train.shape, X_test.shape)
-print(len(y_train), len(y_test))
-
-_save_pickle(id_train, "Dataset/X_train.pkl")
-_save_pickle(id_test, "Dataset/X_test.pkl")
+# from sklearn.model_selection import train_test_split
+# ids = np.arange(len(y_labels))
+#
+# X_train, X_test, y_train, y_test, id_train, id_test = train_test_split(np.stack(embed_faces), y_labels, ids, test_size = 0.3, random_state=20)
+# X_train = np.squeeze(X_train, axis = 1)
+# X_test = np.squeeze(X_test, axis = 1)
+# print(X_train.shape, X_test.shape)
+# print(len(y_train), len(y_test))
+# _save_pickle(id_train, "Dataset/X_train.pkl")
+# _save_pickle(id_test, "Dataset/X_test.pkl")
